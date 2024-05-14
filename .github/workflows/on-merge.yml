@@ -1,0 +1,15 @@
+name: on-merge
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  merge-job:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run my action
+        run: echo "This runs only when a PR is merged into main"
