@@ -1,6 +1,6 @@
 run_on_branches:
     - main
-    - "?-branch"
+    - "**"
     - another-branch/
     - 'dummy'
   
