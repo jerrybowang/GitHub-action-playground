@@ -12,7 +12,7 @@ jobs:
       should_run: ${{ steps.check-branch.outputs.should_run }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@main
+        uses: actions/checkout@v4
 
       - name: Read config file
         id: read-config
