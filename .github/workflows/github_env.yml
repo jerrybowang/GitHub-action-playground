@@ -10,6 +10,7 @@ jobs:
         outputs:
             OUT_VAR: ${{ steps.set-env.outputs.OUT_VAR }}
             A_ENV_VAR: ${{ steps.read-env.outputs.A_ENV_VAR }}
+            branchs: ${{ steps.read-env.outputs.branchs }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -41,3 +42,4 @@ jobs:
               run: |
                 echo "The value of the OUT_VAR variable is ${{ needs.make_env.outputs.OUT_VAR }}"
                 echo "The value of the A_ENV_VAR variable is ${{ needs.make_env.outputs.A_ENV_VAR }}"
+                echo "The value of the branchs variable is ${{ needs.make_env.outputs.branchs }}"
