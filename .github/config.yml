@@ -1,8 +1,5 @@
 run_on_branches:
-    - main
-    - a-branch
-    - another-branch/
-    - 'dummy'
+
   
 other_config:
     - "dummy"
