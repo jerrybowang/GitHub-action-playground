@@ -22,7 +22,7 @@ jobs:
               id: read-env
               run: |
                 if [[ -f con.config ]]; then
-                    branch_config = $(grep '^branchs=' con.config)
+                    branch_config=$(grep '^branchs=' con.config)
                     if [[ -z "$branch_config" ]]; then
                         echo "branchs=" >> $GITHUB_OUTPUT
                     else
