@@ -12,7 +12,7 @@ jobs:
       should_run: ${{ steps.check-branch.outputs.should_run }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@main
 
       - name: Read config file
         id: read-config
@@ -85,9 +85,6 @@ jobs:
     needs: check-config
     if: needs.check-config.outputs.should_run == 'true'
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
       # Add your steps here
       - name: Do stuff
         run: echo "Doing stuff because the conditions were met."
