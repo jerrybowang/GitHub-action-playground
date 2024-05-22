@@ -40,8 +40,9 @@ jobs:
 
           else
 
-            # if the config file does not exist, set the run_on_branches list to an empty string
-            echo "run_on_branches=''" >> "$GITHUB_OUTPUT"
+            # if the config file does not exist, do not set the run_on_branches output
+            echo "run_on_branches=" >> "$GITHUB_OUTPUT"
+            echo "Config file not found. The job will run regardless."
           fi
 
       - name: Check if branch should run
@@ -51,30 +52,32 @@ jobs:
           current_branch=${GITHUB_REF#refs/heads/}
 
           should_run=false
-
           run_on_branches="${{ steps.read-config.outputs.run_on_branches }}"
 
-          # split the run_on_branches list into an array
-          IFS=' ' read -r -a branches <<< "$run_on_branches"
-
-          # iterate over the branches
-          for branch in "${branches[@]}"; do
-
-            # convert the branch name to a regex pattern
-            regex=$(echo "$branch" | sed 's/\./\\./g; s/\*/.*/g; s/\?/.{1}/g')
-
-            # check if the current branch matches the pattern
-            if [[ "$current_branch" =~ ^$regex$ ]]; then
-              should_run=true
-              break
-            fi
-          done
-          
           # fause safe default: if the config file does not exist, the job should run regardless
             if [[ -z "$run_on_branches" ]]; then
                 should_run=true
-            fi
+            else
+                
+                echo "run_on_branches=$run_on_branches"
 
+                # split the run_on_branches list into an array
+                IFS=' ' read -r -a branches <<< "$run_on_branches"
+
+                # iterate over the branches
+                for branch in "${branches[@]}"; do
+
+                    # convert the branch name to a regex pattern
+                    regex=$(echo "$branch" | sed 's/\./\\./g; s/\*/.*/g; s/\?/.{1}/g')
+
+                    # check if the current branch matches the pattern
+                    if [[ "$current_branch" =~ ^$regex$ ]]; then
+                        should_run=true
+                        break
+                    fi
+                done
+            fi
+          
           echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
 
   do-stuff:
