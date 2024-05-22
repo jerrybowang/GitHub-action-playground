@@ -1,4 +1,8 @@
 run_on_branches:
+    - main
+    - "feature/*"
+    - another-branch
+    - 'dummy'
 
   
 other_config:
