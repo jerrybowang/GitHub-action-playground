@@ -18,8 +18,10 @@ jobs:
             - name: read env
               id: read-env
               run: |
-                if [[ -f 'con.config' ]]; then
+                if [[ -f con.config ]]; then
                     cat 'con.config' >> $GITHUB_OUTPUT
+                else
+                    echo "con.config not found"
                 fi
     
 
