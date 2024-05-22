@@ -16,6 +16,7 @@ jobs:
 
       - name: Read config file
         id: read-config
+        shell: bash
         run: |
           # check if the config file exists
           if [[ -f config.yml ]]; then
@@ -48,6 +49,7 @@ jobs:
 
       - name: Check if branch should run
         id: check-branch
+        shell: bash
         run: |
           # get the current branch name
           current_branch=${GITHUB_REF#refs/heads/}

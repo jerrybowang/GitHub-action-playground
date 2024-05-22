@@ -24,6 +24,7 @@ jobs:
                 echo "OUT_VAR=I am OUT" >> $GITHUB_OUTPUT
             - name: read env
               id: read-env
+              shell: bash
               run: |
                 if [[ -f con.config ]]; then
                     branch_config=$(grep '^branchs=' con.config)
