@@ -18,7 +18,7 @@ jobs:
         id: read-config
         run: |
           # check if the config file exists
-          if [[ -f .github/config.yml ]]; then
+          if [[ -f config.yml ]]; then
 
             # use awk to extract the run_on_branches list
             run_on_branches=$(awk '
@@ -29,7 +29,7 @@ jobs:
                     gsub(/["'\'']$/, "")                 # remove trailing quotes
                     print
                 }
-            ' .github/config.yml)
+            ' config.yml)
 
             # convert newlines to spaces, and remove leading and trailing spaces
             run_on_branches=$(echo "$run_on_branches" | tr '\n' ' ' | sed 's/[[:space:]]*$//')
@@ -55,7 +55,7 @@ jobs:
           should_run=false
           run_on_branches="${{ steps.read-config.outputs.run_on_branches }}"
 
-          # fause safe default: if the config file does not exist, the job should run regardless
+          # fause safe default: if the config does not exist, the job should run regardless
             if [[ -z "$run_on_branches" ]]; then
                 should_run=true
             else
