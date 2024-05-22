@@ -33,13 +33,14 @@ jobs:
             | tr '\n' ' ' \                              # convert newlines to spaces
             | sed 's/[[:space:]]*$//')                   # remove trailing spaces
 
-            # set the run_on_branches output
-            echo "::set-output name=run_on_branches::$run_on_branches"
+            # set the run_on_branches output to GITHUB_OUTPUT
+            echo "run_on_branches='$run_on_branches'" >> "$GITHUB_OUTPUT"
+
 
           else
 
             # if the config file does not exist, set the run_on_branches list to an empty string
-            echo "::set-output name=run_on_branches::"
+            echo "run_on_branches=''" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Check if branch should run
@@ -73,7 +74,7 @@ jobs:
                 should_run=true
             fi
 
-          echo "::set-output name=should_run::$should_run"
+          echo "should_run='$should_run'" >> "$GITHUB_OUTPUT"
 
   do-stuff:
     runs-on: ubuntu-latest
