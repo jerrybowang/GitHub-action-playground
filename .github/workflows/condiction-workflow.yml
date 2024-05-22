@@ -1,0 +1,96 @@
+name: condiction scan
+
+on:
+  push:
+    branches:
+      - "**"
+
+
+jobs:
+  check-scan-configuration:
+    runs-on: ubuntu-latest
+    outputs:
+        should_run: ${{ steps.check-branch.outputs.should_run }}
+    steps:
+        - name: sparse-checkout repository .github-management-mend.config
+          uses: actions/checkout@v4
+          with:
+            sparse-checkout: |
+                .github-management-mend.config
+                README.md
+            sparse-checkout-cone-mode: false
+
+        - name: ls
+          run: |
+            ls -la ${{ github.workspace }}
+
+        - name: Read config file
+          id: read-config
+          shell: bash
+          run: |
+            # check if the config file exists
+            if [ -f .github-management-mend.config ]; then
+                # grab the line
+                branch_config=$(grep '^branches=' .github-management-mend.config) 
+
+                if [[ -z "$branch_config" ]]; then
+                    echo "branches=" >> $GITHUB_OUTPUT
+                    echo "no branches config found in config file"
+                else
+                    echo "$branch_config" >> $GITHUB_OUTPUT
+                    echo "branches=$branch_config"
+                fi
+            else
+                echo "github-management-mend.config not found"
+            fi
+        
+        - name: Check if branch should run
+          id: check-branch
+          shell: bash
+          run: |
+            # get the current branch name
+            current_branch=${GITHUB_REF#refs/heads/}
+            echo "current_branch=$current_branch"
+
+            should_run=false
+            run_on_branches="${{ steps.read-config.outputs.branches }}"
+
+            # fause safe default: if the config does not exist, the job should run regardless
+            if [[ -z "$run_on_branches" ]]; then
+                should_run=true
+                echo "no run_on_branches config found in config file, job will run on all branches"
+            else
+                
+                echo "run_on_branches=$run_on_branches"
+
+                # split the run_on_branches list into an array
+                IFS=' ' read -r -a branches <<< "$run_on_branches"
+
+                # iterate over the branches
+                for branch in "${branches[@]}"; do
+
+                    # convert the branch name to a regex pattern
+                    regex=$(echo "$branch" | sed 's/\./\\./g; s/\*/.*/g; s/\?/.{1}/g')
+
+                    # check if the current branch matches the pattern
+                    if [[ "$current_branch" =~ ^$regex ]]; then
+                        should_run=true
+                        break
+                    fi
+                done
+            fi
+            
+            echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
+        
+
+
+
+
+  scan:
+    runs-on: ubuntu-latest
+    needs: check-scan-configuration
+    if: needs.check-scan-configuration.outputs.should_run == 'true'
+    steps:
+        - name: dummy action
+          run: |
+            echo "dummy mend scan"

@@ -1,0 +1,49 @@
+name: GitHub ENV passing
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+    make_env:
+        runs-on: ubuntu-latest
+        outputs:
+            OUT_VAR: ${{ steps.set-env.outputs.OUT_VAR }}
+            A_ENV_VAR: ${{ steps.read-env.outputs.A_ENV_VAR }}
+            branchs: ${{ steps.read-env.outputs.branchs }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                sparse-checkout: |
+                    con.config
+
+            - name: Set up environment variables
+              id: set-env
+              run: |
+                echo "OUT_VAR=I am OUT" >> $GITHUB_OUTPUT
+            - name: read env
+              id: read-env
+              shell: bash
+              run: |
+                if [[ -f con.config ]]; then
+                    branch_config=$(grep '^branchs=' con.config)
+                    if [[ -z "$branch_config" ]]; then
+                        echo "branchs=" >> $GITHUB_OUTPUT
+                    else
+                        echo "$branch_config" >> $GITHUB_OUTPUT
+                    fi
+                else
+                    echo "con.config not found"
+                fi
+    
+
+    use_env:
+        needs: make_env
+        runs-on: ubuntu-latest
+        steps:
+            - name: Use the output
+              run: |
+                echo "The value of the OUT_VAR variable is ${{ needs.make_env.outputs.OUT_VAR }}"
+                echo "The value of the A_ENV_VAR variable is ${{ needs.make_env.outputs.A_ENV_VAR }}"
+                echo "The value of the branchs variable is ${{ needs.make_env.outputs.branchs }}"
