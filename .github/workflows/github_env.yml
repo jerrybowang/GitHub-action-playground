@@ -5,15 +5,15 @@ on:
 jobs:
     make_env:
         outputs:
-            ENV_VAR: ${{ steps.set_env.outputs.ENV_VAR }}
-            OUT_VAR: ${{ steps.set_env.outputs.OUT_VAR }}
+            ENV_VAR: ${{ steps.set-env.outputs.ENV_VAR }}
+            OUT_VAR: ${{ steps.set-env.outputs.OUT_VAR }}
         runs-on: ubuntu-latest
         steps:
             - name: Set up environment variables
-                id: set_env
-                run: |
-                    echo "ENV_VAR=I am ENV" >> $GITHUB_ENV
-                    echo "OUT_VAR=I am OUT" >> $GITHUB_OUTPUT
+              id: set-env
+              run: |
+                echo "ENV_VAR=I am ENV" >> $GITHUB_ENV
+                echo "OUT_VAR=I am OUT" >> $GITHUB_OUTPUT
     
 
     use_env:
