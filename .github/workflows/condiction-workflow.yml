@@ -18,17 +18,22 @@ jobs:
             sparse-checkout: |
                 .github-management-mend.config
 
+        - name: ls
+          run: |
+            ls ${{ github.workspace }}
+
         - name: Read config file
           id: read-config
           shell: bash
           run: |
             # check if the config file exists
-            if [ -f '.github-management-mend.config' ]; then
+            if [ -f .github-management-mend.config ]; then
                 # grab the line
                 branch_config=$(grep '^branches=' .github-management-mend.config) 
-                
+
                 if [[ -z "$branch_config" ]]; then
                     echo "branchs=" >> $GITHUB_OUTPUT
+                    echo "no branchs config found in config file"
                 else
                     echo "$branch_config" >> $GITHUB_OUTPUT
                 fi
