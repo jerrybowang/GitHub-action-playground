@@ -7,6 +7,9 @@ on:
 jobs:
     make_env:
         runs-on: ubuntu-latest
+        outputs:
+            OUT_VAR: ${{ steps.set-env.outputs.OUT_VAR }}
+            A_ENV_VAR: ${{ steps.read-env.outputs.A_ENV_VAR }}
         steps:
             - name: Set up environment variables
               id: set-env
