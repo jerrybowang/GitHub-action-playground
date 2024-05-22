@@ -51,6 +51,7 @@ jobs:
         run: |
           # get the current branch name
           current_branch=${GITHUB_REF#refs/heads/}
+          echo "current_branch=$current_branch"
 
           should_run=false
           run_on_branches="${{ steps.read-config.outputs.run_on_branches }}"
