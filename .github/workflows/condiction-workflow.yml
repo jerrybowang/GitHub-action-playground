@@ -1,9 +1,9 @@
 name: Conditional Workflow
 
-on:
-  push:
-    branches:
-      - '**'
+# on:
+#   push:
+#     branches:
+#       - '**'
 
 jobs:
   check-config:
