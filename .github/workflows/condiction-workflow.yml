@@ -1,0 +1,98 @@
+name: Conditional Workflow
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  check-config:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check-branch.outputs.should_run }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@main
+
+      - name: Read config file
+        id: read-config
+        run: |
+          # check if the config file exists
+          if [[ -f .github/config.yml ]]; then
+
+            # use awk to extract the run_on_branches list
+            run_on_branches=$(awk '
+                /run_on_branches:/ {flag=1; next}       # find the run_on_branches key
+                /^[^[:space:]]/ {flag=0}                # stop when a new key is found
+                flag {
+                    gsub(/^[[:space:]]*-[[:space:]]*["'\'']?/, "")   # remove leading spaces, dashes, and potential quotes
+                    gsub(/["'\'']$/, "")                 # remove trailing quotes
+                    print
+                }
+            ' .github/config.yml \
+            | tr '\n' ' ' \                              # convert newlines to spaces
+            | sed 's/[[:space:]]*$//')                   # remove trailing spaces
+
+            # set the run_on_branches output to GITHUB_OUTPUT
+            echo "run_on_branches=$run_on_branches" >> "$GITHUB_OUTPUT"
+            echo "run_on_branches=$run_on_branches"
+
+
+          else
+
+            # if the config file does not exist, do not set the run_on_branches output
+            echo "run_on_branches=" >> "$GITHUB_OUTPUT"
+            echo "Config file not found. The job will run regardless."
+          fi
+
+      - name: Check if branch should run
+        id: check-branch
+        run: |
+          # get the current branch name
+          current_branch=${GITHUB_REF#refs/heads/}
+
+          should_run=false
+          run_on_branches="${{ steps.read-config.outputs.run_on_branches }}"
+
+          # fause safe default: if the config file does not exist, the job should run regardless
+            if [[ -z "$run_on_branches" ]]; then
+                should_run=true
+            else
+                
+                echo "run_on_branches=$run_on_branches"
+
+                # split the run_on_branches list into an array
+                IFS=' ' read -r -a branches <<< "$run_on_branches"
+
+                # iterate over the branches
+                for branch in "${branches[@]}"; do
+
+                    # convert the branch name to a regex pattern
+                    regex=$(echo "$branch" | sed 's/\./\\./g; s/\*/.*/g; s/\?/.{1}/g')
+
+                    # check if the current branch matches the pattern
+                    if [[ "$current_branch" =~ ^$regex$ ]]; then
+                        should_run=true
+                        break
+                    fi
+                done
+            fi
+          
+          echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
+
+  do-stuff:
+    runs-on: ubuntu-latest
+    needs: check-config
+    if: needs.check-config.outputs.should_run == 'true'
+    steps:
+      # Add your steps here
+      - name: Do stuff
+        run: echo "Doing stuff because the conditions were met."
+
+  mark-check:
+    runs-on: ubuntu-latest
+    needs: check-config
+    if: needs.check-config.outputs.should_run == 'false'
+    steps:
+      - name: Mark as checked
+        run: echo "Skipped because the current branch is not in the allowed branches list."
