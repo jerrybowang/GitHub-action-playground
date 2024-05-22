@@ -36,6 +36,7 @@ jobs:
                     echo "no branchs config found in config file"
                 else
                     echo "$branch_config" >> $GITHUB_OUTPUT
+                    echo "branchs=$branch_config"
                 fi
             else
                 echo "github-management-mend.config not found"
@@ -55,6 +56,7 @@ jobs:
             # fause safe default: if the config does not exist, the job should run regardless
             if [[ -z "$run_on_branches" ]]; then
                 should_run=true
+                echo "no run_on_branches config found in config file, job will run on all branches"
             else
                 
                 echo "run_on_branches=$run_on_branches"
