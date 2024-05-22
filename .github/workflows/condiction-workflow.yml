@@ -34,7 +34,7 @@ jobs:
             | sed 's/[[:space:]]*$//')                   # remove trailing spaces
 
             # set the run_on_branches output to GITHUB_OUTPUT
-            echo "run_on_branches='$run_on_branches'" >> "$GITHUB_OUTPUT"
+            echo "run_on_branches=$run_on_branches" >> "$GITHUB_OUTPUT"
 
 
           else
@@ -74,7 +74,7 @@ jobs:
                 should_run=true
             fi
 
-          echo "should_run='$should_run'" >> "$GITHUB_OUTPUT"
+          echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
 
   do-stuff:
     runs-on: ubuntu-latest
