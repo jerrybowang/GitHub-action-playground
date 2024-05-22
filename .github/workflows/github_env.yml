@@ -1,0 +1,21 @@
+name: GitHub ENV passing
+on:
+  workflow_dispatch:
+
+jobs:
+    make_env:
+        outputs:
+            ENV_VAR: ${{ steps.set_env.outputs.ENV_VAR }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Set up environment variables
+              run: |
+                echo "ENV_VAR=Hello, ${{ github.actor }}!" >> $GITHUB_ENV
+    
+
+    use_env:
+        needs: make_env
+        runs-on: ubuntu-latest
+        steps:
+            - name: Use the output
+              run: echo "The value of the ENV_VAR variable is ${{ needs.make_env.outputs.ENV_VAR }}"
