@@ -29,9 +29,10 @@ jobs:
                     gsub(/["'\'']$/, "")                 # remove trailing quotes
                     print
                 }
-            ' .github/config.yml \
-            | tr '\n' ' ' \                              # convert newlines to spaces
-            | sed 's/[[:space:]]*$//')                   # remove trailing spaces
+            ' .github/config.yml)
+
+            # convert newlines to spaces, and remove leading and trailing spaces
+            run_on_branches=$(echo "$run_on_branches" | tr '\n' ' ' | sed 's/[[:space:]]*$//')
 
             # set the run_on_branches output to GITHUB_OUTPUT
             echo "run_on_branches=$run_on_branches" >> "$GITHUB_OUTPUT"
