@@ -11,6 +11,9 @@ jobs:
             OUT_VAR: ${{ steps.set-env.outputs.OUT_VAR }}
             A_ENV_VAR: ${{ steps.read-env.outputs.A_ENV_VAR }}
         steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
             - name: Set up environment variables
               id: set-env
               run: |
