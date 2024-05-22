@@ -1,19 +1,23 @@
 name: GitHub ENV passing
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
     make_env:
-        outputs:
-            ENV_VAR: ${{ steps.set-env.outputs.ENV_VAR }}
-            OUT_VAR: ${{ steps.set-env.outputs.OUT_VAR }}
         runs-on: ubuntu-latest
         steps:
             - name: Set up environment variables
               id: set-env
               run: |
-                echo "ENV_VAR=I am ENV" >> $GITHUB_ENV
                 echo "OUT_VAR=I am OUT" >> $GITHUB_OUTPUT
+            - name: read env
+              id: read-env
+              run: |
+                if [[ -f 'con.config' ]]; then
+                    cat 'con.config' >> $GITHUB_OUTPUT
+                fi
     
 
     use_env:
@@ -22,5 +26,5 @@ jobs:
         steps:
             - name: Use the output
               run: |
-                echo "The value of the ENV_VAR variable is ${{ needs.make_env.outputs.ENV_VAR }}"
                 echo "The value of the OUT_VAR variable is ${{ needs.make_env.outputs.OUT_VAR }}"
+                echo "The value of the A_ENV_VAR variable is ${{ needs.make_env.outputs.A_ENV_VAR }}"
