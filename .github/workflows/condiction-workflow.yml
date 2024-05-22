@@ -51,7 +51,7 @@ jobs:
             echo "current_branch=$current_branch"
 
             should_run=false
-            run_on_branches="${{ steps.read-config.outputs.run_on_branches }}"
+            run_on_branches="${{ steps.read-config.outputs.branchs }}"
 
             # fause safe default: if the config does not exist, the job should run regardless
             if [[ -z "$run_on_branches" ]]; then
