@@ -20,10 +20,6 @@ jobs:
                 README.md
             sparse-checkout-cone-mode: false
 
-        - name: ls
-          run: |
-            ls -la ${{ github.workspace }}
-
         - name: Read config file
           id: read-config
           shell: bash
@@ -38,7 +34,7 @@ jobs:
                     echo "no branches config found in config file"
                 else
                     echo "$branch_config" >> $GITHUB_OUTPUT
-                    echo "branches=$branch_config"
+                    echo "$branch_config"
                 fi
             else
                 echo "github-management-mend.config not found"
