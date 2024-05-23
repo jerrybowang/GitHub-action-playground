@@ -17,21 +17,21 @@ jobs:
           with:
             sparse-checkout: |
                 .github-management-mend.config
-                README.md
             sparse-checkout-cone-mode: false
-
-        - name: ls
-          run: |
-            ls -la ${{ github.workspace }}
 
         - name: Read config file
           id: read-config
           shell: bash
           run: |
+            # define config file path
+            config_file='.github-management-mend.config'
+            action_name_prefix='Mend_ua_scan'
+
+
             # check if the config file exists
-            if [ -f .github-management-mend.config ]; then
+            if [ -f $config_file ]; then
                 # grab the line
-                branch_config=$(grep '^branches=' .github-management-mend.config) 
+                branch_config=$(grep "^${action_name_prefix}_branches=" $config_file)
 
                 if [[ -z "$branch_config" ]]; then
                     echo "branches=" >> $GITHUB_OUTPUT
@@ -41,7 +41,7 @@ jobs:
                     echo "branches=$branch_config"
                 fi
             else
-                echo "github-management-mend.config not found"
+                echo "$config_file not found"
             fi
         
         - name: Check if branch should run
