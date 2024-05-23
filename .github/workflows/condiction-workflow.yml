@@ -7,24 +7,20 @@ on:
 
 
 jobs:
+  
   check-scan-configuration:
     runs-on: ubuntu-latest
     outputs:
         should_run: ${{ steps.check-branch.outputs.should_run }}
     steps:
-        - name: sparse-checkout repository .github-management-mend.config
+        - name: sparse-checkout the config file
           uses: actions/checkout@v4
           with:
             sparse-checkout: |
                 .github-management-mend.config
-                README.md
             sparse-checkout-cone-mode: false
 
-        - name: ls
-          run: |
-            ls -la ${{ github.workspace }}
-
-        - name: Read config file
+        - name: Read config file for run_on_branches info
           id: read-config
           shell: bash
           run: |
@@ -38,7 +34,7 @@ jobs:
                     echo "no branches config found in config file"
                 else
                     echo "$branch_config" >> $GITHUB_OUTPUT
-                    echo "branches=$branch_config"
+                    echo "$branch_config"
                 fi
             else
                 echo "github-management-mend.config not found"
@@ -68,12 +64,35 @@ jobs:
 
                 # iterate over the branches
                 for branch in "${branches[@]}"; do
+                    # escape the following special characters: (){}+|
+                    regex=$(echo "$branch" | sed "s/[(){}+|]/\\\\&/g")
 
                     # convert the branch name to a regex pattern
-                    regex=$(echo "$branch" | sed 's/\./\\./g; s/\*/.*/g; s/\?/.{1}/g')
+                    # replace . with \. ;; * with [^/]* ;; ? with .{1}
+                    # ** will become [^/]*[^/]*  ;; hence the seconde sed command
+                    regex=$(echo "$branch" | sed 's/\./\\./g; s/\*/[^\/]*/g; s/\?/.{1}/g')
+
+                    # replace [^/]*[^/]*  with .*
+                    regex=$(echo "$regex" | sed 's/\[\^\/\]\*\[\^\/\]\*/.*/g')
+
+                    # finally, hanle the negation of a character set
+                    # eg. [!abc] will become [^abc]
+                    regex=$(echo "$regex" | sed 's/\[\!/\[\^/g')
+
 
                     # check if the current branch matches the pattern
-                    if [[ "$current_branch" =~ ^$regex ]]; then
+                    # the following if block is for Github Actions's negate pattern
+
+                    negate=false
+                    # if there is a negte character "!"
+                    if [[ $regex =~ ^! ]]; then
+                        # remove the "!" character
+                        regex=${regex:1}
+                        negate=true
+                    fi
+
+                    # if the current branch matches the pattern and negate is false, set should_run to true
+                    if [[ "$current_branch" =~ ^$regex$ ]] && [[ $negate == false ]]; then
                         should_run=true
                         break
                     fi
