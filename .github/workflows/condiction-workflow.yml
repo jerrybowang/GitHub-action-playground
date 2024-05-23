@@ -12,14 +12,13 @@ jobs:
     outputs:
         should_run: ${{ steps.check-branch.outputs.should_run }}
     steps:
-        - name: Clean workspace
-          run: rm -rf ${{ github.workspace }}/*
-
         - name: sparse-checkout repository .github-management-mend.config
           uses: actions/checkout@v4
           with:
             sparse-checkout: |
                 .github-management-mend.config
+                README.md
+            sparse-checkout-cone-mode: false
 
         - name: ls
           run: |
