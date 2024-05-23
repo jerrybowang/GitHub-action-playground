@@ -22,7 +22,7 @@ jobs:
 
         - name: ls
           run: |
-            ls ${{ github.workspace }}
+            ls -la ${{ github.workspace }}
 
         - name: Read config file
           id: read-config
