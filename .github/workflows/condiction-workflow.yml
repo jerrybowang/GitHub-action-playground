@@ -64,8 +64,8 @@ jobs:
 
                 # iterate over the branches
                 for branch in "${branches[@]}"; do
-                    # escape brakets and parenthesis and special characters
-                    regex=$(echo "$branch" | sed "s/[][(){}+|]/\\\\&/g")
+                    # escape the following special characters: (){}+|
+                    regex=$(echo "$branch" | sed "s/[(){}+|]/\\\\&/g")
 
                     # convert the branch name to a regex pattern
                     # replace . with \. ;; * with [^/]* ;; ? with .{1}
@@ -75,8 +75,14 @@ jobs:
                     # replace [^/]*[^/]*  with .*
                     regex=$(echo "$regex" | sed 's/\[\^\/\]\*\[\^\/\]\*/.*/g')
 
+                    # finally, hanle the negation of a character set
+                    # eg. [!abc] will become [^abc]
+                    regex=$(echo "$regex" | sed 's/\[\!/\[\^/g')
+
+
                     # check if the current branch matches the pattern
                     # the following if block is for Github Actions's negate pattern
+
                     negate=false
                     # if there is a negte character "!"
                     if [[ $regex =~ ^! ]]; then
@@ -85,14 +91,10 @@ jobs:
                         negate=true
                     fi
 
-                    if [[ "$current_branch" =~ ^$regex$ ]]; then
+                    # if the current branch matches the pattern and negate is false, set should_run to true
+                    if [[ "$current_branch" =~ ^$regex$ ]] && [[ $negate == false ]]; then
                         should_run=true
                         break
-                    else
-                        if $negate; then
-                            should_run=true
-                            break
-                        fi
                     fi
                 done
             fi

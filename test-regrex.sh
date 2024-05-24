@@ -6,6 +6,7 @@ convert_to_regex() {
     regex=$(echo "$branch" | sed "s/[(){}+|]/\\\\&/g")
     regex=$(echo "$regex" | sed 's/\./\\./g; s/\*/[^\/]*/g; s/\?/.{1}/g')
     regex=$(echo "$regex" | sed 's/\[\^\/\]\*\[\^\/\]\*/.*/g')
+    regex=$(echo "$regex" | sed 's/\[\!/\[\^/g')
     echo "$regex"
 }
 
