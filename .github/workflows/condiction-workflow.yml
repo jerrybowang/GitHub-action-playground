@@ -66,7 +66,12 @@ jobs:
                 for branch in "${branches[@]}"; do
 
                     # convert the branch name to a regex pattern
-                    regex=$(echo "$branch" | sed 's/\./\\./g; s/\*/.*/g; s/\?/.{1}/g')
+                    # replace . with \. ;; * with [^/]* ;; ? with .{1}
+                    # ** will become [^/]*[^/]*  ;; hence the seconde sed command
+                    regex=$(echo "$branch" | sed 's/\./\\./g; s/\*/[^\/]*/g; s/\?/.{1}/g')
+
+                    # replace [^/]*[^/]*  with .*
+                    regex=$(echo "$regex" | sed 's/\[\^\/\]\*\[\^\/\]\*/.*/g')
 
                     # check if the current branch matches the pattern
                     if [[ "$current_branch" =~ ^$regex$ ]]; then
