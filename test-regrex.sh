@@ -1,13 +1,24 @@
 #!/bin/bash
 
-# function to convert branch name to regex
+# helper function to convert github action's pattern matching to regex
 convert_to_regex() {
-    local branch=$1
-    regex=$(echo "$branch" | sed "s/[(){}+|]/\\\\&/g")
-    regex=$(echo "$regex" | sed 's/\./\\./g; s/\*/[^\/]*/g; s/\?/.{1}/g')
-    regex=$(echo "$regex" | sed 's/\[\^\/\]\*\[\^\/\]\*/.*/g')
-    regex=$(echo "$regex" | sed 's/\[\!/\[\^/g')
-    echo "$regex"
+    # escape the following special characters: (){}+|
+    local regex_result=$(echo "$1" | sed "s/[(){}+|]/\\\\&/g")
+
+    # convert the branch name to a regex pattern
+    # replace . with \. ;; * with [^/]* ;; ? with .{1}
+    # ** will become [^/]*[^/]*  ;; hence the seconde sed command
+    regex_result=$(echo "$regex_result" | sed 's/\./\\./g; s/\*/[^\/]*/g; s/\?/.{1}/g')
+
+    # replace [^/]*[^/]*  with .*
+    regex_result=$(echo "$regex_result" | sed 's/\[\^\/\]\*\[\^\/\]\*/.*/g')
+
+    # finally, hanle the negation of a character set
+    # eg. [!abc] will become [^abc]
+    regex_result=$(echo "$regex_result" | sed 's/\[\!/\[\^/g')
+
+    # return the regex
+    echo "$regex_result"
 }
 
 # test branches
