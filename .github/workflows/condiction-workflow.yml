@@ -7,20 +7,20 @@ on:
 
 
 jobs:
+  
   check-scan-configuration:
     runs-on: ubuntu-latest
     outputs:
         should_run: ${{ steps.check-branch.outputs.should_run }}
     steps:
-        - name: sparse-checkout repository .github-management-mend.config
+        - name: sparse-checkout the config file
           uses: actions/checkout@v4
           with:
             sparse-checkout: |
                 .github-management-mend.config
-                README.md
             sparse-checkout-cone-mode: false
 
-        - name: Read config file
+        - name: Read config file for run_on_branches info
           id: read-config
           shell: bash
           run: |
