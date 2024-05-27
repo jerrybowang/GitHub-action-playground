@@ -41,20 +41,21 @@ regex=$(convert_to_regex "$branch_pattern")
 
 echo "Regex pattern is: $regex"
 
+negate=false
+# if there is a negte character "!"
+if [[ $regex =~ ^! ]]; then
+    # remove the "!" character
+    regex=${regex:1}
+    negate=true
+fi
+
 # match test branches
 for test_branch in "${test_branches[@]}"; do
-    negate=false
-    # if there is a negte character "!"
-    if [[ $regex =~ ^! ]]; then
-        # remove the "!" character
-        regex=${regex:1}
-        negate=true
-    fi
 
-    if [[ $test_branch =~ ^$regex$ ]]; then
+    if [[ $test_branch =~ ^$regex$ ]] && [[ $negate == false ]]; then
         echo "Matches \"$test_branch\""
     else
-        if $negate; then
+        if $negate && ! [[ $test_branch =~ ^$regex$ ]]; then
             echo "Matches \"$test_branch\""
         else
             echo "Does not match \"$test_branch\""
