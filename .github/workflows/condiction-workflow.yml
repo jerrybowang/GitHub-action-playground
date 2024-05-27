@@ -10,6 +10,8 @@ jobs:
 
   check-scan-configuration:
     runs-on: ubuntu-latest
+    env:
+      CONFIG_FILE_PATH: .github-management-mend.config
     outputs:
         should_run: ${{ steps.check-branch.outputs.should_run }}
     steps:
@@ -17,7 +19,7 @@ jobs:
           uses: actions/checkout@v4
           with:
             sparse-checkout: |
-                .github-management-mend.config
+              ${{ env.CONFIG_FILE_PATH }}
             sparse-checkout-cone-mode: false
 
         - name: Read config file for run_on_branches info
@@ -25,9 +27,9 @@ jobs:
           shell: bash
           run: |
             # check if the config file exists
-            if [ -f .github-management-mend.config ]; then
+            if [ -f $CONFIG_FILE_PATH ]; then
                 # grab the line
-                branch_config=$(grep '^branches=' .github-management-mend.config) 
+                branch_config=$(grep '^branches=' $CONFIG_FILE_PATH) 
 
                 if [[ -z "$branch_config" ]]; then
                     echo "branches=" >> $GITHUB_OUTPUT
