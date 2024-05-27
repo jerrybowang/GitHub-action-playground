@@ -109,6 +109,11 @@ jobs:
                     if [[ "$current_branch" =~ ^$regex$ ]] && [[ $negate == false ]]; then
                         should_run=true
                         break
+                    else
+                        if $negate && ! [[ $test_branch =~ ^$regex$ ]]; then
+                            should_run=true
+                            break
+                        fi
                     fi
                 done
             fi
