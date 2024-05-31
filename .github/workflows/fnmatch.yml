@@ -1,0 +1,17 @@
+name: fnmatch
+
+on:
+    workflow_dispatch:
+
+jobs:
+    check-if-fnmatch-is-available:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check if fnmatch is available
+              shell: bash
+              run: |
+                if [[ $(fnmatch "**" "abc") ]]; then
+                    echo "fnmatch is available"
+                else
+                    echo "fnmatch is not available"
+                fi
