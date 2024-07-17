@@ -1,0 +1,22 @@
+name: List all branches
+
+on:
+  workflow_dispatch:
+
+jobs:
+    list-branches:
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+            sparse-checkout: |
+              .github
+            sparse-checkout-cone-mode: false
+        - name: List branches
+          run: |
+            out=$(git branch -r | grep -v '\->') 
+            # remove origin/ from each line amd whitespace
+            out=$(echo "$out" | sed 's/origin\///g' | sed 's/ //g')
+            echo "$out"
