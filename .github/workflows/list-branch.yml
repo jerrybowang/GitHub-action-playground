@@ -1,0 +1,19 @@
+name: List all branched
+
+on:
+  push:
+
+jobs:
+    list-branches:
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+        - name: List branches
+          run: |
+            out=$(git branch -r | grep -v '\->') 
+            # remove origin/ from each line amd whitespace
+            out=$(echo "$out" | sed 's/origin\///g' | sed 's/ //g')
+            echo "$out"
