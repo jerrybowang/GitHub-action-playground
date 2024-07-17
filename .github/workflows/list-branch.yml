@@ -1,7 +1,7 @@
-name: List all branched
+name: List all branches
 
 on:
-  push:
+  workflow_dispatch:
 
 jobs:
     list-branches:
