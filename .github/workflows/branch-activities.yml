@@ -1,0 +1,50 @@
+name: Weekly Branch Activity Check
+
+on:
+  schedule:
+    - cron: '0 0 * * 6' # Every Saturday at midnight
+  workflow_dispatch:
+
+jobs:
+  check-branch-activity:
+    runs-on: ubuntu-latest
+    outputs:
+      has_activity: ${{ steps.check_activity.outputs.has_activity }}
+      manual_trigger: ${{ steps.manual_trigger.outputs.manual_trigger }}
+    steps:
+    
+    - name: Determine if manual trigger
+      id: manual_trigger
+      run: echo "manual_trigger=${{ github.event_name == 'workflow_dispatch' }}" >> $GITHUB_OUTPUT
+
+
+    - name: Check branch activity
+      id: check_activity
+      run: |
+        # List branches deleted in the last week
+
+        # Github API query doc: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#list-repository-activities 
+        query="per_page=100&time_period=week&activity_type=branch_deletion"
+
+        branches=$(curl -s \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          -H "Accept: application/vnd.github+json" \
+          "https://api.github.com/repos/${{ github.repository }}/activity?$query" | \
+          jq -r '[.[] | .ref]')
+
+
+        echo "Branches: $branches"
+        if [ "$branches" == "[]" ]; then
+          echo "has_activity=false" >> $GITHUB_OUTPUT
+        else
+          echo "has_activity=true" >> $GITHUB_OUTPUT
+        fi
+
+  intensive-work:
+    runs-on: ubuntu-latest
+    needs: check-branch-activity
+    if: needs.check-branch-activity.outputs.has_activity == 'true' || needs.check-branch-activity.outputs.manual_trigger == 'true'
+    steps:
+    - name: Do intensive work
+      run: echo "Performing intensive work..."
