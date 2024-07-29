@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
       # runs every minute for testing
-    - cron: '*/1 * * * *'
+    - cron: '*/5 * * * *'
 
 jobs:
   check-branch-activity:
