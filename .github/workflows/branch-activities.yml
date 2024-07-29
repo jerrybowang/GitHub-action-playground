@@ -9,13 +9,13 @@ on:
 jobs:
   check-branch-activity:
     runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
     outputs:
       has_activity: ${{ steps.check_activity.outputs.has_activity }}
     steps:
 
     - name: Check branch activity
       id: check_activity
-      if: github.event_name == 'schedule'
       run: |
         # List some branches deleted in the last week
 
