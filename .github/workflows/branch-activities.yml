@@ -3,11 +3,14 @@ name: Weekly Branch Activity Check
 on:
   workflow_dispatch:
   # schedule:
-  #     - cron: '0 0 * * 6' # Every Saturday at midnight
+  #   # every hour
+  #   - cron: '0 * * * *'
+
 
 jobs:
   check-branch-activity:
     runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
     outputs:
       has_activity: ${{ steps.check_activity.outputs.has_activity }}
     steps:
@@ -18,7 +21,7 @@ jobs:
         # List some branches deleted in the last week
 
         # Github API query doc: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#list-repository-activities 
-        query="time_period=day&activity_type=branch_deletion"
+        query="time_period=week&activity_type=branch_deletion"
 
         branches=$(curl -s \
           -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
