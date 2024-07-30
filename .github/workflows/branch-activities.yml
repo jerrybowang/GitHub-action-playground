@@ -2,6 +2,9 @@ name: Weekly Branch Activity Check
 
 on:
   workflow_dispatch:
+  schedule:
+    # every hour
+    - cron: '0 * * * *'
 
 
 jobs:
