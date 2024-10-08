@@ -1,0 +1,21 @@
+name: Caller Workflow
+# This workflow will call another workflow
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  dummy-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: dummy step
+        run: echo "dummy step"
+
+  call-walkflow:
+    needs: dummy-workflow
+    uses: ./.github/workflows/calle-workflow.yml
+    with:
+      example_input: "Hello"
+      example_secound_input: "World"
+

@@ -1,0 +1,30 @@
+name: calle Workflow
+
+on:
+  workflow_call:
+    inputs:
+      example_input:
+        required: true
+        type: string
+      example_secound_input:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      example_input:
+        required: true
+        type: string
+      example_secound_input:
+        required: true
+        type: string
+    
+
+
+jobs:
+  calle-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: echo inputs
+        run: |
+          echo "example_input: ${{inputs.example_input}}"
+          echo "example_secound_input: ${{inputs.example_secound_input}}"
