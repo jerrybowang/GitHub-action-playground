@@ -1,9 +1,7 @@
 name: Test Docker Layer Caching
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   build:

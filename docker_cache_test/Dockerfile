@@ -6,7 +6,7 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-FROM python:3.12.7-slim as base
+FROM python:3.12.7-slim AS base
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -47,4 +47,4 @@ COPY . .
 EXPOSE 9090
 
 # Run the application.
-CMD python app.py
+CMD [python, app.py]
