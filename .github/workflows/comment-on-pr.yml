@@ -1,0 +1,87 @@
+name: comments on PR
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Pull Request number'
+        required: true
+
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: get PR number
+        id: pr_number
+        run: |
+          if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
+            echo "PR_NUMBER=$(jq -r .number < $GITHUB_EVENT_PATH)" >> $GITHUB_ENV
+          else
+            echo "PR_NUMBER=${{ github.event.inputs.pr_number }}" >> $GITHUB_ENV
+          fi
+      
+      - name: Find comment by keyword
+        id: find_comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ env.PR_NUMBER }}
+          KEYWORD: "### Github Actions Comment"
+        run: |
+          gh pr view  ${{ env.PR_NUMBER }} --json comments > comments.json
+
+          # Find the latest comment with the specified keyword/title
+          COMMENT_ID=$(jq -r --arg keyword "$KEYWORD" \
+            '.comments | sort_by(.createdAt) | reverse | map(select(.body | startswith($keyword)))
+            | .[0].url | capture("#issuecomment-(?<id>\\d+)") | .id' comments.json || echo "")
+
+          echo "comment_id=$COMMENT_ID" >> $GITHUB_OUTPUT
+      
+      - name: Generate result comment in PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ env.PR_NUMBER }}
+        run: |
+          # get the current commit hash
+          if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
+            commit_hash="${{ github.event.pull_request.head.sha }}"
+          else
+            commit_hash=$(git rev-parse HEAD)
+          fi
+
+          # define the comment message
+          echo "### Github Actions Comment" >> comment.txt
+          echo "This is a comment from Github Actions" >> comment.txt
+          echo "" >> comment.txt
+          echo "This comment reflects the commit: [\`$(echo $commit_hash | cut -c1-7)\`](https://github.com/${{ github.repository }}/commit/$commit_hash)" >> comment.txt
+
+          # post/update the comment
+          if [[ -z "${{ steps.find_comment.outputs.comment_id }}" ]]; then
+            gh pr comment $PR_NUMBER --body-file comment.txt
+          else
+            # wrap the comment in a json object
+            jq -n --arg body "$(cat comment.txt)" '{body: $body}' > comment.json
+
+            # if an error occured, post the comment
+            {
+              gh api \
+                -X PATCH \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                /repos/${{ github.repository }}/issues/comments/${{ steps.find_comment.outputs.comment_id }} \
+                --input comment.json > /dev/null
+            } || 
+            {
+              echo "Note: An error occured while updating the comment. Updated comment has been posted as this new comment." >> comment.txt
+              gh pr comment $PR_NUMBER --body-file comment.txt
+            }
+          fi
+
+
+          
